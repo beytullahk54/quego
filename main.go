@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"quego.com/gin-crud/config"
+	"quego.com/gin-crud/jobs"
 	"quego.com/gin-crud/routes"
 	"quego.com/gin-crud/users"
 
@@ -20,6 +21,9 @@ func main() {
 
 	// Tabloları oluştur
 	if err := db.AutoMigrate(&users.User{}); err != nil {
+		log.Fatal("Tablolar oluşturulamadı:", err)
+	}
+	if err := db.AutoMigrate(&jobs.Job{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
 

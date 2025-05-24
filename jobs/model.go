@@ -1,6 +1,9 @@
 package jobs
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Job struct {
 	ID      string `json:"id"`      // UUID (veya snowflake)
@@ -18,4 +21,29 @@ type Job struct {
 	UpdatedAt time.Time `json:"updated_at"`
 
 	TokenID string `json:"token_id"` // Bu job hangi API token ile ilişkili
+}
+
+// UnmarshalJSON var ise otomatik olarak çözümlenir.
+func (j *Job) UnmarshalJSON(data []byte) error {
+	type Alias Job
+	aux := &struct {
+		ExecuteAt string `json:"execute_at"`
+		*Alias
+	}{
+		Alias: (*Alias)(j),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Tarih formatını çözümle
+	if aux.ExecuteAt != "" {
+		t, err := time.Parse("2006-01-02", aux.ExecuteAt)
+		if err != nil {
+			return err
+		}
+		j.ExecuteAt = t
+	}
+
+	return nil
 }
