@@ -6,7 +6,7 @@ import (
 
 	"quego.com/gin-crud/config"
 	"quego.com/gin-crud/routes"
-	"quego.com/gin-crud/user"
+	"quego.com/gin-crud/users"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +19,7 @@ func main() {
 	db := config.InitDB()
 
 	// Tabloları oluştur
-	if err := db.AutoMigrate(&user.User{}); err != nil {
+	if err := db.AutoMigrate(&users.User{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
 

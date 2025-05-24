@@ -2,7 +2,7 @@ package routes
 
 import (
 	jobs "quego.com/gin-crud/jobs"
-	"quego.com/gin-crud/user"
+	users "quego.com/gin-crud/users"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -10,7 +10,7 @@ import (
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	// User routes
-	UserController := user.NewController(db)
+	UserController := users.NewController(db)
 	r.GET("/users", UserController.GetUsers)
 	r.GET("/users/:id", UserController.GetUserByID)
 	r.POST("/users", UserController.CreateUser)
