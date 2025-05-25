@@ -27,6 +27,3 @@ git clone https://github.com/kullanici/delayed-http-job-queue.git
 cd delayed-http-job-queue
 go run cmd/server/main.go
 ```
-
-#go #backend #timer #job
-
