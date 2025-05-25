@@ -130,7 +130,7 @@ func (c *Controller) CheckAndProcessJobs() {
 	now := time.Now()
 
 	// Şu anki zamandan önce çalışması gereken işleri al
-	err := c.DB.Where("execute_at <= ? AND status = ?", now, "1").Find(&jobs).Error
+	err := c.DB.Where("execute_at <= ? AND status = ?", now, "pending").Find(&jobs).Error
 	if err != nil {
 		log.Printf("Jobs kontrol edilirken hata oluştu: %v", err)
 		return
