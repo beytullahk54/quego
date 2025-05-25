@@ -1,8 +1,13 @@
 package jobs
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -117,4 +122,89 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Product deleted"})
+}
+
+// CheckAndProcessJobs, jobs tablosunu kontrol eder ve gerekli istekleri atar
+func (c *Controller) CheckAndProcessJobs() {
+	var jobs []Job
+	now := time.Now()
+
+	// Şu anki zamandan önce çalışması gereken işleri al
+	err := c.DB.Where("execute_at <= ? AND status = ?", now, "1").Find(&jobs).Error
+	if err != nil {
+		log.Printf("Jobs kontrol edilirken hata oluştu: %v", err)
+		return
+	}
+
+	for _, job := range jobs {
+		// İsteği gönder
+		err := sendRequest(job, c)
+		if err != nil {
+			log.Printf("İstek gönderilirken hata oluştu (Job ID: %d): %v", job.ID, err)
+			continue
+		}
+
+		// Bir sonraki çalışma zamanını güncelle (5 dakika sonra)
+		/*job.NextRun = now.Add(5 * time.Minute)
+		if err := c.DB.Save(&job).Error; err != nil {
+			log.Printf("Job güncellenirken hata oluştu (Job ID: %d): %v", job.ID, err)
+		}*/
+	}
+}
+
+// sendRequest, belirtilen job için HTTP isteği gönderir
+func sendRequest(job Job, c *Controller) error {
+	// İstek gövdesini hazırla
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"job_id":      job.ID,
+		"url":         job.URL,
+		"method":      job.Method,
+		"headers":     job.Headers,
+		"body":        job.Body,
+		"execute_at":  job.ExecuteAt,
+		"status":      job.Status,
+		"retry_count": job.RetryCount,
+		"max_retries": job.MaxRetries,
+		"token_id":    job.TokenID,
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Println("İstek gönderiliyor:", job.URL)
+	// HTTP isteği gönder
+	req, err := http.NewRequest(job.Method, job.URL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+
+	// HTTP isteğini gönder
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	log.Println("İstek gönderildi:", job.ID)
+
+	var existingProperty Job
+	if err := c.DB.First(&existingProperty, job.ID).Error; err != nil {
+		return err
+	}
+
+	result := c.DB.Model(&existingProperty).Updates(Job{
+		Status: "2",
+	})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// Yanıt durumunu kontrol et
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("beklenmeyen yanıt kodu: %d", resp.StatusCode)
+	}
+
+	return nil
 }
