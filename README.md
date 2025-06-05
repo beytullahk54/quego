@@ -14,11 +14,11 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 
 ## 🔧 Özellikler
 
-- 🕰️ Gecikmeli HTTP istek planlama (`POST /jobs`)
-- 🔐 API Token doğrulama
-- ✅ Job durumlarını takip edebilme (`pending`, `done`, `failed`, `cancelled`)
-- ♻️ Basit retry (yeniden deneme) desteği
-- 🗃️ SQLite veya PostgreSQL desteği (esnek yapı)
+- Gecikmeli HTTP istek planlama (`POST /jobs`)
+- API Token doğrulama
+- Job durumlarını takip edebilme (`pending`, `done`, `failed`, `cancelled`)
+- Basit retry (yeniden deneme) desteği
+- SQLite veya PostgreSQL desteği (esnek yapı)
 
 ## 📝 Yapılacaklar
 
@@ -31,7 +31,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 ## 📦 Kurulum
 
 ```bash
-git clone https://github.com/kullanici/delayed-http-job-queue.git
-cd delayed-http-job-queue
+git clone https://github.com/beytullahk54/quego.git
+cd quego
 go run cmd/server/main.go
 ```
