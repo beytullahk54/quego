@@ -32,14 +32,14 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 }
 
 func (c *Controller) GetJobByID(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	var property Job
-	result := c.DB.First(&property, id)
+	result := c.DB.First(&property, uint(id))
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
@@ -49,10 +49,23 @@ func (c *Controller) GetJobByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateJob(ctx *gin.Context) {
+	//GMT+3
 	var newProperty Job
 	if err := ctx.ShouldBindJSON(&newProperty); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Türkiye saat dilimini ayarla
+	loc, err := time.LoadLocation("Europe/Istanbul")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Saat dilimi ayarlanamadı"})
+		return
+	}
+
+	// ExecuteAt'i Türkiye saatine göre ayarla
+	if !newProperty.ExecuteAt.IsZero() {
+		newProperty.ExecuteAt = newProperty.ExecuteAt.In(loc)
 	}
 
 	result := c.DB.Create(&newProperty)
@@ -65,7 +78,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 }
 
 func (c *Controller) UpdateJob(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
@@ -78,7 +91,7 @@ func (c *Controller) UpdateJob(ctx *gin.Context) {
 	}
 
 	var existingProperty Job
-	if err := c.DB.First(&existingProperty, id).Error; err != nil {
+	if err := c.DB.First(&existingProperty, uint(id)).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
@@ -99,18 +112,18 @@ func (c *Controller) UpdateJob(ctx *gin.Context) {
 		return
 	}
 
-	updatedProperty.ID = strconv.Itoa(id)
+	updatedProperty.ID = uint(id)
 	ctx.JSON(http.StatusOK, updatedProperty)
 }
 
 func (c *Controller) DeleteJob(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	result := c.DB.Delete(&Job{}, id)
+	result := c.DB.Delete(&Job{}, uint(id))
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
@@ -194,7 +207,7 @@ func sendRequest(job Job, c *Controller) error {
 	}
 
 	result := c.DB.Model(&existingProperty).Updates(Job{
-		Status: "2",
+		Status: "done",
 	})
 
 	if result.Error != nil {

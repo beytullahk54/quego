@@ -29,7 +29,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	c := cron.New()
 	jobController := jobs.NewController(db)
 
-	// Her 5 dakikada bir çalışacak cron job
+	// Her 1 dakikada bir çalışacak cron job
 
 	_, err := c.AddFunc("*/1 * * * *", func() {
 		//log.Println("Jobs kontrol ediliyor...")

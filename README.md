@@ -22,7 +22,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 
 ## 📝 Yapılacaklar
 
-- [ ] 🕰️ İstenilen tam tarih ve saat getirilmesi
+- [X] 🕰️ İstenilen tam tarih ve saat getirilmesi
 - [ ] 📡 Postman örnek dosyası paylaşılması
 - [ ] ✅ Validation sisteminin geliştirilmesi
 - [ ] 🎨 Basit bir UI hazırlanması

@@ -6,7 +6,7 @@ import (
 )
 
 type Job struct {
-	ID      string `json:"id"`      // UUID (veya snowflake)
+	ID      uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	URL     string `json:"url"`     // Gönderilecek endpoint
 	Method  string `json:"method"`  // POST, GET, PUT, DELETE
 	Headers string `json:"headers"` // JSON string olarak saklanabilir (map değil!)
@@ -38,7 +38,12 @@ func (j *Job) UnmarshalJSON(data []byte) error {
 
 	// Tarih formatını çözümle
 	if aux.ExecuteAt != "" {
-		t, err := time.Parse("2006-01-02", aux.ExecuteAt)
+		loc, err := time.LoadLocation("Europe/Istanbul")
+		if err != nil {
+			return err
+		}
+
+		t, err := time.ParseInLocation("2006-01-02 15:04", aux.ExecuteAt, loc)
 		if err != nil {
 			return err
 		}
