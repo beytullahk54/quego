@@ -23,7 +23,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 ## 📝 Yapılacaklar
 
 - [X] 🕰️ İstenilen tam tarih ve saat getirilmesi
-- [ ] 📡 Postman örnek dosyası paylaşılması
+- [X] 📡 Postman örnek dosyası paylaşılması
 - [ ] ✅ Validation sisteminin geliştirilmesi
 - [ ] 🎨 Basit bir UI hazırlanması
 - [ ] 🔑 API token oluşturulması ve bu token'a göre ait olunan işlerin listelenmesinin sağlanması
