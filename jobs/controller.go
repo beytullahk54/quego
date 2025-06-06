@@ -49,92 +49,127 @@ func (c *Controller) GetJobByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateJob(ctx *gin.Context) {
-	//GMT+3
-	var newProperty Job
-	if err := ctx.ShouldBindJSON(&newProperty); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var newDTO JobDTO
+	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Geçersiz istek formatı",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	// Türkiye saat dilimini ayarla
-	loc, err := time.LoadLocation("Europe/Istanbul")
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Saat dilimi ayarlanamadı"})
+	// Validation kontrolü
+	if err := newDTO.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Gerekli alanlar eksik veya hatalı",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	// ExecuteAt'i Türkiye saatine göre ayarla
-	if !newProperty.ExecuteAt.IsZero() {
-		newProperty.ExecuteAt = newProperty.ExecuteAt.In(loc)
-	}
+	// DTO'yu Job struct'ine dönüştür
+	newJob := newDTO.ToJob()
 
-	result := c.DB.Create(&newProperty)
+	result := c.DB.Create(newJob)
 	if result.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Veritabanı hatası",
+			"details": result.Error.Error(),
+		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, newProperty)
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "Job başarıyla oluşturuldu",
+		"data":    newJob,
+	})
 }
 
 func (c *Controller) UpdateJob(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+	id := ctx.Param("id")
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID parametresi gereklidir"})
 		return
 	}
 
-	var updatedProperty Job
-	if err := ctx.ShouldBindJSON(&updatedProperty); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var updatedDTO JobDTO
+	if err := ctx.ShouldBindJSON(&updatedDTO); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Geçersiz istek formatı",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	var existingProperty Job
-	if err := c.DB.First(&existingProperty, uint(id)).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	// Validation kontrolü
+	if err := updatedDTO.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Gerekli alanlar eksik veya hatalı",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	result := c.DB.Model(&existingProperty).Updates(Job{
-		URL:        updatedProperty.URL,
-		Method:     updatedProperty.Method,
-		Headers:    updatedProperty.Headers,
-		Body:       updatedProperty.Body,
-		ExecuteAt:  updatedProperty.ExecuteAt,
-		Status:     updatedProperty.Status,
-		RetryCount: updatedProperty.RetryCount,
-		MaxRetries: updatedProperty.MaxRetries,
-		TokenID:    updatedProperty.TokenID,
-	})
+	// DTO'yu Job struct'ine dönüştür
+	updatedJob := updatedDTO.ToJob()
+
+	// Önce mevcut kaydı bul
+	var existingJob Job
+	if err := c.DB.First(&existingJob, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error":   "Job bulunamadı",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Sadece değişen alanları güncelle
+	result := c.DB.Model(&existingJob).Updates(updatedJob)
 	if result.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Veritabanı hatası",
+			"details": result.Error.Error(),
+		})
 		return
 	}
 
-	updatedProperty.ID = uint(id)
-	ctx.JSON(http.StatusOK, updatedProperty)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Job başarıyla güncellendi",
+		"data":    updatedJob,
+	})
 }
 
 func (c *Controller) DeleteJob(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Geçersiz istek",
+			"details": "ID formatı hatalı",
+		})
 		return
 	}
 
 	result := c.DB.Delete(&Job{}, uint(id))
 	if result.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Veritabanı hatası",
+			"details": result.Error.Error(),
+		})
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error":   "Kayıt bulunamadı",
+			"details": fmt.Sprintf("ID: %d", id),
+		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Product deleted"})
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Job başarıyla silindi",
+		"data":    map[string]interface{}{"id": id},
+	})
 }
 
 // CheckAndProcessJobs, jobs tablosunu kontrol eder ve gerekli istekleri atar

@@ -37,18 +37,20 @@ func (j *Job) UnmarshalJSON(data []byte) error {
 	}
 
 	// Tarih formatını çözümle
-	if aux.ExecuteAt != "" {
-		loc, err := time.LoadLocation("Europe/Istanbul")
-		if err != nil {
-			return err
-		}
-
-		t, err := time.ParseInLocation("2006-01-02 15:04", aux.ExecuteAt, loc)
-		if err != nil {
-			return err
-		}
-		j.ExecuteAt = t
+	if aux.ExecuteAt == "" {
+		return nil
 	}
+
+	loc, err := time.LoadLocation("Europe/Istanbul")
+	if err != nil {
+		return err
+	}
+
+	t, err := time.ParseInLocation("2006-01-02 15:04", aux.ExecuteAt, loc)
+	if err != nil {
+		return err
+	}
+	j.ExecuteAt = t
 
 	return nil
 }
