@@ -25,7 +25,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 - [X] İstenilen tam tarih ve saat getirilmesi
 - [X] Postman örnek dosyası paylaşılması
 - [X] Validation sisteminin geliştirilmesi
-- [ ] Tüm modüllere validation eklenmesi
+- [X] Tüm modüllere validation eklenmesi
 - [ ] Klasör yapısının değiştirilmesi
 - [ ] API token modülü oluşturulması ve bu token'a göre ait olunan işlerin listelenmesinin sağlanması
 - [ ] Middleware Hazırlanması tokensız giriş yapılmaması

@@ -56,11 +56,22 @@ func (c *Controller) GetUserByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateUser(ctx *gin.Context) {
-	var newUser User
-	if err := ctx.ShouldBindJSON(&newUser); err != nil {
+	var newDTO UserDTO
+	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Validation kontrolü
+	if err := newDTO.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Gerekli alanlar eksik veya hatalı",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	newUser := newDTO.ToJob()
 
 	result := c.DB.Create(&newUser)
 	if result.Error != nil {
@@ -78,30 +89,39 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	var updatedUser User
-	if err := ctx.ShouldBindJSON(&updatedUser); err != nil {
+	var updatedDTO UserDTO
+	if err := ctx.ShouldBindJSON(&updatedDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Validation kontrolü
+	if err := updatedDTO.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Gerekli alanlar eksik veya hatalı",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	updatedUser := updatedDTO.ToJob()
 	var existingUser User
 	if err := c.DB.First(&existingUser, id).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	result := c.DB.Model(&existingUser).Updates(User{
-		Name:     updatedUser.Name,
-		Email:    updatedUser.Email,
-		Password: updatedUser.Password,
-	})
+	updatedUser.ID = uint(id)
+	result := c.DB.Model(&existingUser).Updates(updatedUser)
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
 	}
 
-	updatedUser.ID = uint(id)
-	ctx.JSON(http.StatusOK, updatedUser)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "User başarıyla güncellendi",
+		"data":    updatedUser,
+	})
 }
 
 func (c *Controller) DeleteUser(ctx *gin.Context) {
