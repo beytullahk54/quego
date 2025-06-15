@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"quego.com/gin-crud/config"
-	"quego.com/gin-crud/jobs"
-	"quego.com/gin-crud/routes"
-	"quego.com/gin-crud/users"
+	"quego.com/gin-crud/internal/api/routes"
+	"quego.com/gin-crud/internal/jobs"
+	"quego.com/gin-crud/internal/users"
 
 	"github.com/gin-gonic/gin"
 )

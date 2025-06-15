@@ -26,7 +26,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 - [X] Postman örnek dosyası paylaşılması
 - [X] Validation sisteminin geliştirilmesi
 - [X] Tüm modüllere validation eklenmesi
-- [ ] Klasör yapısının değiştirilmesi
+- [X] Klasör yapısının best practice'e uygun hale getirilmesi
 - [ ] API token modülü oluşturulması ve bu token'a göre ait olunan işlerin listelenmesinin sağlanması
 - [ ] Middleware Hazırlanması tokensız giriş yapılmaması
 - [ ] Basit bir UI hazırlanması

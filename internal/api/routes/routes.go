@@ -1,8 +1,8 @@
 package routes
 
 import (
-	jobs "quego.com/gin-crud/jobs"
-	users "quego.com/gin-crud/users"
+	jobs "quego.com/gin-crud/internal/jobs"
+	users "quego.com/gin-crud/internal/users"
 
 	"log"
 	"net/http"
