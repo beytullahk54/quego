@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"quego.com/gin-crud/internal/auth/tokens"
-	"quego.com/gin-crud/internal/users"
+	"quego.com/gin-crud/internal/models"
 )
 
 type Customer struct {
@@ -32,24 +32,17 @@ func (c *Controller) Store(r *gin.Context) {
 		return
 	}
 
-	var property users.User
+	var property models.User
 	result := c.DB.Where("email = ?", data["Email"]).Where("password = ?", data["Password"]).First(&property) //Veritabanından email ile kullanıcı arıyoruz
 	if result.Error != nil {
 		r.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	/*if property.Password != data["Password"] { //Gelen password ile veritabanındaki password kontrol ediyoruz
+	if property.Password != data["Password"] { //Gelen password ile veritabanındaki password kontrol ediyoruz
 		r.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
-	}*/
-
-	/*var token tokens.Token
-	tokenResult := c.DB.Where("user_id = ?", property.ID).First(&token)
-	if tokenResult.Error != nil {
-		r.JSON(http.StatusNotFound, gin.H{"error": "Token not found"})
-		return
-	}*/
+	}
 
 	token, err := tokens.CreateToken(property.Email)
 	if err != nil {

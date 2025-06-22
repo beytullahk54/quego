@@ -1,13 +1,15 @@
 package tokens
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 	"quego.com/gin-crud/config"
-	"quego.com/gin-crud/internal/users"
+	"quego.com/gin-crud/internal/models"
 )
 
 var secretKey = []byte("secret-key")
@@ -29,10 +31,10 @@ func CreateToken(username string) (string, error) {
 		return "", err
 	}
 
-	var user users.User
+	var user models.User
 	db.First(&user, "email = ?", username)
 
-	result := db.Create(&Token{UserID: strconv.Itoa(int(user.ID)), TokenID: tokenString})
+	result := db.Create(&models.Token{UserID: strconv.Itoa(int(user.ID)), TokenID: tokenString})
 	if result.Error != nil {
 		return "", result.Error
 	}
@@ -40,8 +42,9 @@ func CreateToken(username string) (string, error) {
 	return tokenString, nil
 }
 
-/*func VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(ctx *gin.Context) error {
+	tokenString := ctx.GetHeader("Authorization")
+	token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
@@ -54,4 +57,4 @@ func CreateToken(username string) (string, error) {
 	}
 
 	return nil
-}*/
+}

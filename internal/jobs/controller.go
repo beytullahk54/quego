@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"quego.com/gin-crud/internal/auth/tokens"
+	"quego.com/gin-crud/internal/models"
 )
 
 type Controller struct {
@@ -22,7 +24,12 @@ func NewController(db *gorm.DB) *Controller {
 }
 
 func (c *Controller) GetJobs(ctx *gin.Context) {
-	var properties []Job
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var properties []models.Job
 	result := c.DB.Find(&properties)
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
@@ -32,13 +39,18 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 }
 
 func (c *Controller) GetJobByID(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	var property Job
+	var property models.Job
 	result := c.DB.First(&property, uint(id))
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
@@ -49,6 +61,12 @@ func (c *Controller) GetJobByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateJob(ctx *gin.Context) {
+
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	var newDTO JobDTO
 	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -86,6 +104,11 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 }
 
 func (c *Controller) UpdateJob(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id := ctx.Param("id")
 	if id == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID parametresi gereklidir"})
@@ -114,7 +137,7 @@ func (c *Controller) UpdateJob(ctx *gin.Context) {
 	updatedJob := updatedDTO.ToJob()
 
 	// Önce mevcut kaydı bul
-	var existingJob Job
+	var existingJob models.Job
 	if err := c.DB.First(&existingJob, id).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"error":   "Job bulunamadı",
@@ -140,6 +163,11 @@ func (c *Controller) UpdateJob(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteJob(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -149,7 +177,7 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 		return
 	}
 
-	result := c.DB.Delete(&Job{}, uint(id))
+	result := c.DB.Delete(&models.Job{}, uint(id))
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Veritabanı hatası",
@@ -174,7 +202,7 @@ func (c *Controller) DeleteJob(ctx *gin.Context) {
 
 // CheckAndProcessJobs, jobs tablosunu kontrol eder ve gerekli istekleri atar
 func (c *Controller) CheckAndProcessJobs() {
-	var jobs []Job
+	var jobs []models.Job
 	now := time.Now()
 
 	// Şu anki zamandan önce çalışması gereken işleri al
@@ -201,7 +229,7 @@ func (c *Controller) CheckAndProcessJobs() {
 }
 
 // sendRequest, belirtilen job için HTTP isteği gönderir
-func sendRequest(job Job, c *Controller) error {
+func sendRequest(job models.Job, c *Controller) error {
 	// İstek gövdesini hazırla
 	requestBody, err := json.Marshal(map[string]interface{}{
 		"job_id":      job.ID,
@@ -236,12 +264,12 @@ func sendRequest(job Job, c *Controller) error {
 
 	log.Println("İstek gönderildi:", job.ID)
 
-	var existingProperty Job
+	var existingProperty models.Job
 	if err := c.DB.First(&existingProperty, job.ID).Error; err != nil {
 		return err
 	}
 
-	result := c.DB.Model(&existingProperty).Updates(Job{
+	result := c.DB.Model(&existingProperty).Updates(models.Job{
 		Status: "done",
 	})
 

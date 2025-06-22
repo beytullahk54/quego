@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"quego.com/gin-crud/internal/auth/tokens"
+	"quego.com/gin-crud/internal/models"
 )
 
 type Controller struct {
@@ -17,8 +19,13 @@ func NewController(db *gorm.DB) *Controller {
 }
 
 func (c *Controller) GetUsers(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	// Boş bir Book slice'ı (dizi) oluştur
-	var users []User
+	var users []models.User
 
 	// Veritabanından tüm kitapları çek
 	// c.DB: Controller'ın veritabanı bağlantısı
@@ -39,13 +46,18 @@ func (c *Controller) GetUsers(ctx *gin.Context) {
 }
 
 func (c *Controller) GetUserByID(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	var user User
+	var user models.User
 	result := c.DB.First(&user, id)
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -56,6 +68,11 @@ func (c *Controller) GetUserByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateUser(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	var newDTO UserDTO
 	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -83,6 +100,11 @@ func (c *Controller) CreateUser(ctx *gin.Context) {
 }
 
 func (c *Controller) UpdateUser(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -105,7 +127,7 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 	}
 
 	updatedUser := updatedDTO.ToJob()
-	var existingUser User
+	var existingUser models.User
 	if err := c.DB.First(&existingUser, id).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -125,13 +147,18 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteUser(ctx *gin.Context) {
+	if err := tokens.VerifyToken(ctx); err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	result := c.DB.Delete(&User{}, id)
+	result := c.DB.Delete(&models.User{}, id)
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return

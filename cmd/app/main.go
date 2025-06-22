@@ -6,9 +6,7 @@ import (
 
 	"quego.com/gin-crud/config"
 	"quego.com/gin-crud/internal/api/routes"
-	"quego.com/gin-crud/internal/auth/tokens"
-	"quego.com/gin-crud/internal/jobs"
-	"quego.com/gin-crud/internal/users"
+	"quego.com/gin-crud/internal/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,13 +19,13 @@ func main() {
 	db := config.InitDB()
 
 	// Tabloları oluştur
-	if err := db.AutoMigrate(&users.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
-	if err := db.AutoMigrate(&jobs.Job{}); err != nil {
+	if err := db.AutoMigrate(&models.Job{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
-	if err := db.AutoMigrate(&tokens.Token{}); err != nil {
+	if err := db.AutoMigrate(&models.Token{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
 

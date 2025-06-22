@@ -1,4 +1,4 @@
-package jobs
+package models
 
 import (
 	"encoding/json"

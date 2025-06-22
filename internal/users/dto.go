@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"quego.com/gin-crud/internal/models"
 )
 
 // JobDTO API isteklerinde kullanılan veri transferi için
@@ -22,8 +23,8 @@ func (j *UserDTO) Validate() error {
 }
 
 // ToJob DTO'yu Job struct'ine dönüştürür
-func (j *UserDTO) ToJob() *User {
-	job := &User{
+func (j *UserDTO) ToJob() *models.User {
+	job := &models.User{
 		Name:     j.Name,
 		Email:    j.Email,
 		Password: j.Password,
