@@ -1,6 +1,8 @@
 package routes
 
 import (
+	login "quego.com/gin-crud/internal/auth/login"
+	deneme "quego.com/gin-crud/internal/deneme"
 	jobs "quego.com/gin-crud/internal/jobs"
 	users "quego.com/gin-crud/internal/users"
 
@@ -55,6 +57,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 	r.POST("/jobs", jobController.CreateJob)
 	r.PUT("/jobs/:id", jobController.UpdateJob)
 	r.DELETE("/jobs/:id", jobController.DeleteJob)
+
+	r.GET("/deneme", deneme.TestFonk)
+
+	loginController := login.NewController(db)
+	r.POST("/login", loginController.Store)
 
 	r.GET("/test", func(c *gin.Context) {
 		log.Println("Test endpoint çağrıldı")

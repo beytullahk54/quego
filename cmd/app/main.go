@@ -6,6 +6,7 @@ import (
 
 	"quego.com/gin-crud/config"
 	"quego.com/gin-crud/internal/api/routes"
+	"quego.com/gin-crud/internal/auth/tokens"
 	"quego.com/gin-crud/internal/jobs"
 	"quego.com/gin-crud/internal/users"
 
@@ -24,6 +25,9 @@ func main() {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
 	if err := db.AutoMigrate(&jobs.Job{}); err != nil {
+		log.Fatal("Tablolar oluşturulamadı:", err)
+	}
+	if err := db.AutoMigrate(&tokens.Token{}); err != nil {
 		log.Fatal("Tablolar oluşturulamadı:", err)
 	}
 

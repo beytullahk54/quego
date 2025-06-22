@@ -36,5 +36,5 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 ```bash
 git clone https://github.com/beytullahk54/quego.git
 cd quego
-go run cmd/server/main.go
+go run cmd/app/main.go
 ```
