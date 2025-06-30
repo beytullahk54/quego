@@ -28,8 +28,9 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 - [X] Tüm modüllere validation eklenmesi
 - [X] Klasör yapısının best practice'e uygun hale getirilmesi
 - [X] Middleware Hazırlanması tokensız giriş yapılmaması
-- [ ] API token modülü oluşturulması ve bu token'a göre ait olunan işlerin listelenmesinin sağlanması
 - [ ] Basit bir UI hazırlanması
+- [ ] İşlerin token'a göre kaydedilmesi
+- [ ] İşlerin token'a göre listelenmesi
 
 ## 📦 Kurulum
 
