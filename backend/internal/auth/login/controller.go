@@ -33,14 +33,14 @@ func (c *Controller) Store(r *gin.Context) {
 	}
 
 	var property models.User
-	result := c.DB.Where("email = ?", data["Email"]).Where("password = ?", data["Password"]).First(&property) //Veritabanından email ile kullanıcı arıyoruz
+	result := c.DB.Where("email = ?", data["email"]).Where("password = ?", data["password"]).First(&property) //Veritabanından email ile kullanıcı arıyoruz
 	if result.Error != nil {
-		r.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		r.JSON(http.StatusOK, gin.H{"error": "User not found"})
 		return
 	}
 
-	if property.Password != data["Password"] { //Gelen password ile veritabanındaki password kontrol ediyoruz
-		r.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	if property.Password != data["password"] { //Gelen password ile veritabanındaki password kontrol ediyoruz
+		r.JSON(http.StatusOK, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -50,5 +50,11 @@ func (c *Controller) Store(r *gin.Context) {
 		return
 	}
 
-	r.JSON(http.StatusOK, gin.H{"token": token, "data": data, "property": property, "message": "Login successful"}) //Başarılı ise response olarak data, property ve message döndürüyoruz
+	r.JSON(http.StatusOK,
+		gin.H{
+			"token":   token,
+			"data":    data,
+			"message": "Login successful",
+			"user":    property,
+		}) //Başarılı ise response olarak data, property ve message döndürüyoruz
 }
