@@ -34,8 +34,17 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 
 ## 📦 Kurulum
 
+
+### Backend Kurulumu
 ```bash
 git clone https://github.com/beytullahk54/quego.git
-cd quego
+cd quego/backend
 go run cmd/app/main.go
+```
+
+### Frontend Kurulumu
+```bash
+cd quego/frontend
+yarn install
+yarn dev
 ```
