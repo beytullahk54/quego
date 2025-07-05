@@ -14,7 +14,7 @@ type JobDTO struct {
 	Method     string `json:"method" validate:"required,oneof=GET POST PUT DELETE"`
 	Headers    string `json:"headers"`
 	Body       string `json:"body"`
-	ExecuteAt  string `json:"execute_at" validate:"required,datetime=2006-01-02 15:04"`
+	ExecuteAt  string `json:"execute_at" validate:"required"`
 	Status     string `json:"status"`
 	RetryCount int    `json:"retry_count"`
 	MaxRetries int    `json:"max_retries"`
@@ -45,7 +45,7 @@ func (j *JobDTO) ToJob() *models.Job {
 	// ExecuteAt'i parse et
 	if j.ExecuteAt != "" {
 		loc, _ := time.LoadLocation("Europe/Istanbul")
-		t, _ := time.ParseInLocation("2006-01-02 15:04", j.ExecuteAt, loc)
+		t, _ := time.ParseInLocation("2006-01-02T15:04", j.ExecuteAt, loc)
 		job.ExecuteAt = t
 	}
 

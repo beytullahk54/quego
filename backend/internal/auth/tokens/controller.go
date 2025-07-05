@@ -43,17 +43,16 @@ func CreateToken(username string) (string, error) {
 }
 
 func VerifyToken(ctx *gin.Context) error {
-	tokenString := ctx.GetHeader("Authorization")
-	token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (interface{}, error) {
+	token := ctx.GetHeader("Authorization")[7:]
+	/*token, err := jwt.Parse(tokenString[7:], func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
-	})
+	})*/
 
-	if err != nil {
-		return err
-	}
+	var tokens models.Token
+	db.First(&tokens, "token_id = ?", token)
 
-	if !token.Valid {
-		return fmt.Errorf("invalid token")
+	if tokens.TokenID == "" {
+		return fmt.Errorf("token not found")
 	}
 
 	return nil

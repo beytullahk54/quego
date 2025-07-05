@@ -61,12 +61,12 @@ func (c *Controller) GetJobByID(ctx *gin.Context) {
 }
 
 func (c *Controller) CreateJob(ctx *gin.Context) {
-
 	if err := tokens.VerifyToken(ctx); err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
+	fmt.Println("Create Job")
 	var newDTO JobDTO
 	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
