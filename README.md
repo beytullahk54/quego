@@ -28,7 +28,7 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 - [X] Tüm modüllere validation eklenmesi
 - [X] Klasör yapısının best practice'e uygun hale getirilmesi
 - [X] Middleware Hazırlanması tokensız giriş yapılmaması
-- [ ] Basit bir UI hazırlanması
+- [X] Basit bir UI hazırlanması
 - [ ] İşlerin token'a göre kaydedilmesi
 - [ ] İşlerin token'a göre listelenmesi
 

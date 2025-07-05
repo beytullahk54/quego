@@ -1,22 +1,23 @@
 import { create } from 'zustand'
-import { User } from '@/types/user'
+import { Job } from '@/types/job'
 
 interface UserStore {
-  users: User[];
+  jobs: Job[];
   isLoading: boolean;
   error: string | null;
   fetchUsers: (token: string) => Promise<void>;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
-  users: [],
+  jobs: [],
   isLoading: false,
   error: null,
 
   fetchUsers: async (token: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`, {
+        method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -24,13 +25,13 @@ export const useUserStore = create<UserStore>((set) => ({
       });
 
       if (!response.ok) {
-        throw new Error('Kullanıcılar yüklenirken bir hata oluştu');
+        throw new Error('İşler yüklenirken bir hata oluştu');
       }
 
       const data = await response.json();
-      set({ users: data, isLoading: false });
+      set({ jobs: data, isLoading: false });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Kullanıcılar yüklenemedi', isLoading: false });
+      set({ error: error instanceof Error ? error.message : 'İşler yüklenemedi', isLoading: false });
     }
   },
 }));

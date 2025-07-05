@@ -21,7 +21,7 @@ export function Topbar() {
   useEffect(() => {
     // Sadece client tarafında çalışacak
     const user = auth.getUser();
-    setUserName(user?.name || null);
+    setUserName(user?.Name || null);
   }, []);
 
   const handleSignOut = async () => {

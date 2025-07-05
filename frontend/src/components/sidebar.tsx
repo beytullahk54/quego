@@ -4,7 +4,7 @@ import Link from "next/link"
 
 const menuItems = [
   { name: "Ana Sayfa", icon: HomeIcon, path: "/" },
-  { name: "Jobs", icon: UsersIcon, path: "/users" },
+  { name: "İşler", icon: UsersIcon, path: "/jobs" },
   /*{ name: "", icon: BarChart3Icon, path: "/statistics" },
   { name: "Ayarlar", icon: SettingsIcon, path: "/settings" },*/
 ]
