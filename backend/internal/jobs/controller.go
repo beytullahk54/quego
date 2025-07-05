@@ -30,7 +30,7 @@ func (c *Controller) GetJobs(ctx *gin.Context) {
 	}
 
 	var properties []models.Job
-	result := c.DB.Find(&properties)
+	result := c.DB.Find(&properties, "token_id = ?", tokens.GetIdToken(ctx))
 	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
 		return
@@ -51,7 +51,7 @@ func (c *Controller) GetJobByID(ctx *gin.Context) {
 	}
 
 	var property models.Job
-	result := c.DB.First(&property, uint(id))
+	result := c.DB.First(&property, uint(id), "token_id = ?", tokens.GetIdToken(ctx))
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
@@ -66,7 +66,6 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Create Job")
 	var newDTO JobDTO
 	if err := ctx.ShouldBindJSON(&newDTO); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -86,6 +85,7 @@ func (c *Controller) CreateJob(ctx *gin.Context) {
 	}
 
 	// DTO'yu Job struct'ine dönüştür
+	newDTO.TokenID = tokens.GetIdToken(ctx)
 	newJob := newDTO.ToJob()
 
 	result := c.DB.Create(newJob)

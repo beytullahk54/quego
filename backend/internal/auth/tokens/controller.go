@@ -57,3 +57,13 @@ func VerifyToken(ctx *gin.Context) error {
 
 	return nil
 }
+
+func GetIdToken(ctx *gin.Context) string {
+	token := ctx.GetHeader("Authorization")[7:]
+	var tokens models.Token
+	db.First(&tokens, "token_id = ?", token)
+	if tokens.TokenID == "" {
+		return ""
+	}
+	return tokens.UserID
+}

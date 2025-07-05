@@ -29,8 +29,8 @@ otomatik olarak HTTP isteği gönderebilirsiniz.
 - [X] Klasör yapısının best practice'e uygun hale getirilmesi
 - [X] Middleware Hazırlanması tokensız giriş yapılmaması
 - [X] Basit bir UI hazırlanması
-- [ ] İşlerin token'a göre kaydedilmesi
-- [ ] İşlerin token'a göre listelenmesi
+- [X] İşlerin token'a göre kaydedilmesi
+- [X] İşlerin token'a göre listelenmesi
 
 ## 📦 Kurulum
 
